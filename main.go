@@ -60,6 +60,7 @@ func initCommands() commands {
 	cmds.register("login", handlerLogins)
 	cmds.register("register", handlerRegister)
 	cmds.register("reset", handlerReset)
+	cmds.register("users", handlerUsers)
 
 	return cmds
 }

@@ -61,6 +61,23 @@ func handlerRegister(s *state, cmd command) error {
 	return nil
 }
 
+func handlerUsers(s *state, cmd command) error {
+	users, err := s.db.GetUsers(context.Background())
+	if err != nil {
+		return fmt.Errorf("get users: %w", err)
+	}
+
+	for _, u := range users {
+		if u.Name.String == s.cfg.CurrentUserName {
+			fmt.Printf("* %s (current)\n", u.Name.String)
+			continue
+		}
+		fmt.Printf("* %s\n", u.Name.String)
+	}
+
+	return nil
+}
+
 func handlerReset(s *state, cmd command) error {
 	if err := s.db.DeleteAllUser(context.Background()); err != nil {
 		return fmt.Errorf("delete users: %w", err)
