@@ -7,3 +7,6 @@ RETURNING *;
 SELECT *
 FROM users
 WHERE name = $1;
+
+-- name: DeleteAllUser :exec
+DELETE FROM users;
