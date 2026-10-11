@@ -4,7 +4,9 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
+	"time"
 
 	"github.com/lbergold-dev/gator/internal/config"
 	"github.com/lbergold-dev/gator/internal/database"
@@ -12,8 +14,9 @@ import (
 )
 
 type state struct {
-	cfg *config.Config
-	db  *database.Queries
+	cfg        *config.Config
+	db         *database.Queries
+	httpClient *http.Client
 }
 
 func main() {
@@ -29,7 +32,8 @@ func main() {
 	}
 
 	programState := &state{
-		cfg: cfg,
+		cfg:        cfg,
+		httpClient: &http.Client{Timeout: 20 * time.Second},
 	}
 
 	db, err := sql.Open("postgres", programState.cfg.DBURL)
@@ -61,6 +65,7 @@ func initCommands() commands {
 	cmds.register("register", handlerRegister)
 	cmds.register("reset", handlerReset)
 	cmds.register("users", handlerUsers)
+	cmds.register("agg", handlerAgg)
 
 	return cmds
 }
