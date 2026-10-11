@@ -13,12 +13,12 @@ import (
 
 func handlerLogins(s *state, cmd command) error {
 	if len(cmd.arguments) != 1 {
-		return fmt.Errorf("login command requires exactly 1 argument, got %d", len(cmd.arguments))
+		return fmt.Errorf("usage: %s <name>", cmd.name)
 	}
 
 	userName := cmd.arguments[0]
 
-	_, err := s.db.GetUser(context.Background(), sql.NullString{String: userName, Valid: true})
+	_, err := s.db.GetUser(context.Background(), userName)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return fmt.Errorf("user %q does not exist", userName)
 	}
@@ -37,14 +37,14 @@ func handlerLogins(s *state, cmd command) error {
 
 func handlerRegister(s *state, cmd command) error {
 	if len(cmd.arguments) != 1 {
-		return fmt.Errorf("register command requires exactly 1 argument, got %d", len(cmd.arguments))
+		return fmt.Errorf("usage: %s <name>", cmd.name)
 	}
 
 	userParams := database.CreateUserParams{
 		ID:        uuid.New(),
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
-		Name:      sql.NullString{String: cmd.arguments[0], Valid: true},
+		Name:      cmd.arguments[0],
 	}
 
 	user, err := s.db.CreateUser(context.Background(), userParams)
@@ -52,11 +52,11 @@ func handlerRegister(s *state, cmd command) error {
 		return fmt.Errorf("create user: %w", err)
 	}
 
-	if err := s.cfg.SetUser(user.Name.String); err != nil {
+	if err := s.cfg.SetUser(user.Name); err != nil {
 		return fmt.Errorf("set user: %w", err)
 	}
 
-	fmt.Printf("User %q has been created\n", user.Name.String)
+	fmt.Printf("User %q has been created\n", user.Name)
 
 	return nil
 }
@@ -68,11 +68,11 @@ func handlerUsers(s *state, cmd command) error {
 	}
 
 	for _, u := range users {
-		if u.Name.String == s.cfg.CurrentUserName {
-			fmt.Printf("* %s (current)\n", u.Name.String)
+		if u.Name == s.cfg.CurrentUserName {
+			fmt.Printf("* %s (current)\n", u.Name)
 			continue
 		}
-		fmt.Printf("* %s\n", u.Name.String)
+		fmt.Printf("* %s\n", u.Name)
 	}
 
 	return nil
