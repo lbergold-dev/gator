@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
+	"text/tabwriter"
 	"time"
 
 	"github.com/google/uuid"
@@ -45,6 +47,30 @@ func handlerAddFeed(s *state, cmd command) error {
 	}
 
 	fmt.Printf("created feed: %+v\n", feed)
+
+	return nil
+}
+
+func handlerFeeds(s *state, cmd command) error {
+	feeds, err := s.db.GetFeeds(context.Background())
+	if err != nil {
+		return fmt.Errorf("get feeds: %w", err)
+	}
+
+	if len(feeds) == 0 {
+		fmt.Println("No feeds found.")
+		return nil
+	}
+
+	w := tabwriter.NewWriter(os.Stdout, 1, 1, 3, ' ', 0)
+
+	for _, feed := range feeds {
+		fmt.Fprintf(w, "* %s\t%s\t%s\n", feed.Name, feed.Url, feed.UserName)
+	}
+
+	if err := w.Flush(); err != nil {
+		return fmt.Errorf("flush writer: %w", err)
+	}
 
 	return nil
 }
