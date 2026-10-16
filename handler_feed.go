@@ -12,7 +12,9 @@ import (
 )
 
 func handlerAgg(s *state, cmd command) error {
-	feed, err := fetchFeed(s, context.Background(), "https://www.wagslane.dev/index.xml")
+	ctx := context.Background()
+
+	feed, err := fetchFeed(s, ctx, "https://www.wagslane.dev/index.xml")
 	if err != nil {
 		return fmt.Errorf("fetch feed: %w", err)
 	}
@@ -27,7 +29,9 @@ func handlerAddFeed(s *state, cmd command) error {
 		return fmt.Errorf("usage: %s <name> <url>", cmd.name)
 	}
 
-	user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
+	ctx := context.Background()
+
+	user, err := s.db.GetUserByName(ctx, s.cfg.CurrentUserName)
 	if err != nil {
 		return fmt.Errorf("get user: %w", err)
 	}
@@ -41,24 +45,39 @@ func handlerAddFeed(s *state, cmd command) error {
 		UserID:    user.ID,
 	}
 
-	feed, err := s.db.CreateFeed(context.Background(), feedParams)
+	feed, err := s.db.CreateFeed(ctx, feedParams)
 	if err != nil {
 		return fmt.Errorf("create feed: %w", err)
 	}
 
-	fmt.Printf("created feed: %+v\n", feed)
+	fmt.Printf("Created feed %s with url %q\n", feed.Name, feed.Url)
+
+	_, err = s.db.CreateFeedFollow(ctx, database.CreateFeedFollowParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
+		UserID:    user.ID,
+		FeedID:    feed.ID,
+	})
+	if err != nil {
+		return fmt.Errorf("create feed follow: %w", err)
+	}
+
+	fmt.Println("Followed feed")
 
 	return nil
 }
 
 func handlerFeeds(s *state, cmd command) error {
-	feeds, err := s.db.GetFeeds(context.Background())
+
+	ctx := context.Background()
+	feeds, err := s.db.GetFeeds(ctx)
 	if err != nil {
 		return fmt.Errorf("get feeds: %w", err)
 	}
 
 	if len(feeds) == 0 {
-		fmt.Println("No feeds found.")
+		fmt.Println("No feeds found")
 		return nil
 	}
 

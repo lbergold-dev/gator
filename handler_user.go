@@ -18,7 +18,9 @@ func handlerLogins(s *state, cmd command) error {
 
 	userName := cmd.arguments[0]
 
-	_, err := s.db.GetUser(context.Background(), userName)
+	ctx := context.Background()
+
+	_, err := s.db.GetUserByName(ctx, userName)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return fmt.Errorf("user %q does not exist", userName)
 	}
@@ -47,7 +49,9 @@ func handlerRegister(s *state, cmd command) error {
 		Name:      cmd.arguments[0],
 	}
 
-	user, err := s.db.CreateUser(context.Background(), userParams)
+	ctx := context.Background()
+
+	user, err := s.db.CreateUser(ctx, userParams)
 	if err != nil {
 		return fmt.Errorf("create user: %w", err)
 	}
@@ -62,7 +66,9 @@ func handlerRegister(s *state, cmd command) error {
 }
 
 func handlerUsers(s *state, cmd command) error {
-	users, err := s.db.GetUsers(context.Background())
+	ctx := context.Background()
+
+	users, err := s.db.GetUsers(ctx)
 	if err != nil {
 		return fmt.Errorf("get users: %w", err)
 	}
@@ -79,11 +85,13 @@ func handlerUsers(s *state, cmd command) error {
 }
 
 func handlerReset(s *state, cmd command) error {
-	if err := s.db.DeleteAllUser(context.Background()); err != nil {
+	ctx := context.Background()
+
+	if err := s.db.DeleteAllUser(ctx); err != nil {
 		return fmt.Errorf("delete users: %w", err)
 	}
 
-	fmt.Println("All users got deleted!")
+	fmt.Println("All users deleted")
 
 	return nil
 }
