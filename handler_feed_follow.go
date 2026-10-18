@@ -11,17 +11,12 @@ import (
 	"github.com/lbergold-dev/gator/internal/database"
 )
 
-func handlerFollow(s *state, cmd command) error {
+func handlerFollow(s *state, cmd command, user database.User) error {
 	if len(cmd.arguments) != 1 {
 		return fmt.Errorf("usage: follow <url>")
 	}
 
 	ctx := context.Background()
-
-	user, err := s.db.GetUserByName(ctx, s.cfg.CurrentUserName)
-	if err != nil {
-		return fmt.Errorf("get user: %w", err)
-	}
 
 	feed, err := s.db.GetFeedByUrl(ctx, cmd.arguments[0])
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
@@ -49,13 +44,8 @@ func handlerFollow(s *state, cmd command) error {
 	return nil
 }
 
-func handlerFollowing(s *state, cmd command) error {
+func handlerFollowing(s *state, cmd command, user database.User) error {
 	ctx := context.Background()
-
-	user, err := s.db.GetUserByName(ctx, s.cfg.CurrentUserName)
-	if err != nil {
-		return fmt.Errorf("get user: %w", err)
-	}
 
 	feedFollows, err := s.db.GetFeedFollowsForUser(ctx, user.ID)
 	if err != nil {
