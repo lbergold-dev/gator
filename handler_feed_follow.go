@@ -13,7 +13,7 @@ import (
 
 func handlerFollow(s *state, cmd command, user database.User) error {
 	if len(cmd.arguments) != 1 {
-		return fmt.Errorf("usage: follow <url>")
+		return errors.New("usage: follow <url>")
 	}
 
 	ctx := context.Background()
@@ -66,7 +66,7 @@ func handlerFollowing(s *state, cmd command, user database.User) error {
 
 func handlerUnfollow(s *state, cmd command, user database.User) error {
 	if len(cmd.arguments) != 1 {
-		return fmt.Errorf("usage: unfollow <url>")
+		return errors.New("usage: unfollow <url>")
 	}
 
 	ctx := context.Background()

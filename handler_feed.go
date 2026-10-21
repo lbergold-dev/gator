@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"log"
 	"os"
 	"text/tabwriter"
 	"time"
@@ -12,16 +14,29 @@ import (
 )
 
 func handlerAgg(s *state, cmd command) error {
-	ctx := context.Background()
-
-	feed, err := fetchFeed(s, ctx, "https://www.wagslane.dev/index.xml")
-	if err != nil {
-		return fmt.Errorf("fetch feed: %w", err)
+	if len(cmd.arguments) != 1 {
+		return errors.New("usage: agg <time_between_requests>")
 	}
 
-	fmt.Printf("%+v\n", feed)
+	timeBetweenRequest, err := time.ParseDuration(cmd.arguments[0])
+	if err != nil {
+		return fmt.Errorf("parse duration: %w", err)
+	}
 
-	return nil
+	fmt.Printf("Collecting feeds every %v\n", timeBetweenRequest)
+
+	ticker := time.NewTicker(timeBetweenRequest)
+	defer ticker.Stop()
+
+	ctx := context.Background()
+
+	for {
+		if err := scrapeFeeds(s, ctx); err != nil {
+			log.Println(err)
+		}
+		<-ticker.C
+	}
+
 }
 
 func handlerAddFeed(s *state, cmd command, user database.User) error {

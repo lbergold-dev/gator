@@ -11,9 +11,9 @@ import (
 	"github.com/lbergold-dev/gator/internal/database"
 )
 
-func handlerLogins(s *state, cmd command) error {
+func handlerLogin(s *state, cmd command) error {
 	if len(cmd.arguments) != 1 {
-		return fmt.Errorf("usage: %s <name>", cmd.name)
+		return errors.New("usage: login <name>")
 	}
 
 	userName := cmd.arguments[0]
@@ -39,7 +39,7 @@ func handlerLogins(s *state, cmd command) error {
 
 func handlerRegister(s *state, cmd command) error {
 	if len(cmd.arguments) != 1 {
-		return fmt.Errorf("usage: %s <name>", cmd.name)
+		return errors.New("usage: register <name>")
 	}
 
 	userParams := database.CreateUserParams{

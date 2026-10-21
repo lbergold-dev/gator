@@ -61,7 +61,7 @@ func initCommands() commands {
 	cmds := commands{
 		handlerFuncs: map[string]func(*state, command) error{},
 	}
-	cmds.register("login", handlerLogins)
+	cmds.register("login", handlerLogin)
 	cmds.register("register", handlerRegister)
 	cmds.register("reset", handlerReset)
 	cmds.register("users", handlerUsers)
