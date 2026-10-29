@@ -2,9 +2,7 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"log"
 	"os"
 	"text/tabwriter"
 	"time"
@@ -12,32 +10,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/lbergold-dev/gator/internal/database"
 )
-
-func handlerAgg(s *state, cmd command) error {
-	if len(cmd.arguments) != 1 {
-		return errors.New("usage: agg <time_between_requests>")
-	}
-
-	timeBetweenRequest, err := time.ParseDuration(cmd.arguments[0])
-	if err != nil {
-		return fmt.Errorf("parse duration: %w", err)
-	}
-
-	fmt.Printf("Collecting feeds every %v\n", timeBetweenRequest)
-
-	ticker := time.NewTicker(timeBetweenRequest)
-	defer ticker.Stop()
-
-	ctx := context.Background()
-
-	for {
-		if err := scrapeFeeds(s, ctx); err != nil {
-			log.Println(err)
-		}
-		<-ticker.C
-	}
-
-}
 
 func handlerAddFeed(s *state, cmd command, user database.User) error {
 	if len(cmd.arguments) != 2 {

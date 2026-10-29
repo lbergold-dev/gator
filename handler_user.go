@@ -91,6 +91,10 @@ func handlerReset(s *state, cmd command) error {
 		return fmt.Errorf("delete users: %w", err)
 	}
 
+	if err := s.cfg.SetUser(""); err != nil {
+		return fmt.Errorf("set user: %w", err)
+	}
+
 	fmt.Println("All users deleted")
 
 	return nil
