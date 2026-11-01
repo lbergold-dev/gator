@@ -14,15 +14,19 @@ type Config struct {
 	CurrentUserName string `json:"current_user_name"`
 }
 
+// SetUser writes the current user name to ~/.config/gator/config.json.
+// It returns an error if the file cannot be written.
 func (c *Config) SetUser(user string) error {
 	c.CurrentUserName = user
 	return write(*c)
 }
 
+// Read loads the configuration from ~/.config/gator/config.json.
+// Returns an error if the file does not exist or contains invalid JSON.
 func Read() (*Config, error) {
 	cfgDir, err := getConfigDir()
 	if err != nil {
-		return nil, fmt.Errorf("get config dir")
+		return nil, fmt.Errorf("get config dir: %w", err)
 	}
 
 	jsonCfg, err := os.ReadFile(filepath.Join(cfgDir, configFileName))
@@ -42,7 +46,7 @@ func Read() (*Config, error) {
 func write(cfg Config) error {
 	cfgDir, err := getConfigDir()
 	if err != nil {
-		return fmt.Errorf("get config dir")
+		return fmt.Errorf("get config dir: %w", err)
 	}
 
 	if err := os.MkdirAll(cfgDir, 0700); err != nil {

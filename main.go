@@ -13,6 +13,8 @@ import (
 	_ "github.com/lib/pq"
 )
 
+const defaultHTTPTimeout = 20 * time.Second
+
 type state struct {
 	cfg        *config.Config
 	db         *database.Queries
@@ -33,15 +35,19 @@ func main() {
 
 	programState := &state{
 		cfg:        cfg,
-		httpClient: &http.Client{Timeout: 20 * time.Second},
+		httpClient: &http.Client{Timeout: defaultHTTPTimeout},
 	}
 
 	db, err := sql.Open("postgres", programState.cfg.DBURL)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 	defer db.Close()
+
+	if err := db.Ping(); err != nil {
+		log.Fatal(err)
+	}
+
 	programState.db = database.New(db)
 
 	cmds := initCommands()
